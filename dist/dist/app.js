@@ -45,7 +45,7 @@ app.use(express_1.default.json());
 if (process.env.NODE_ENV === 'development') {
     app.use((0, morgan_1.default)('dev'));
 }
-app.post('/api/vi/listings', listing_2.default);
+app.use('/api/v1/listings', listing_2.default);
 app.all('*', function (req, res, next) {
     return next(new appError_1.default("Can't find ".concat(req.originalUrl, " on this server")));
 });

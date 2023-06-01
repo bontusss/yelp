@@ -55,6 +55,7 @@ var listingSchema = new mongoose_1.default.Schema({
     instagram: String,
     twitter: String,
     linkedIn: String,
+    createdAt: { type: Date, default: Date.now(), select: false },
 });
 var Listing = mongoose_1.default.model('Listing', listingSchema);
 exports.default = Listing;

@@ -91,10 +91,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateListing = exports.createListing = void 0;
-var _1 = __importDefault(require(""));
+exports.deleteListing = exports.getListings = exports.updateListing = exports.createListing = void 0;
+var appError_1 = __importDefault(require("../utils/appError"));
 var listing_1 = __importDefault(require("../model/listing"));
 var catchAsync_1 = __importDefault(require("../utils/catchAsync"));
+var module_1 = __importDefault(require());
 var createListing = (0, catchAsync_1.default)(function (req, res) {
     return __awaiter(void 0, void 0, void 0, function () {
         var newListing;
@@ -113,18 +114,69 @@ var createListing = (0, catchAsync_1.default)(function (req, res) {
     });
 });
 exports.createListing = createListing;
+var getListings = (0, catchAsync_1.default)(function (req, res, next) {
+    return __awaiter(void 0, void 0, void 0, function () {
+        var sortBy, fields, page, limit, skip, numListings, features, listings;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    if (req.query.sort) {
+                        sortBy = req.query.sort.split(',').join(' ');
+                        query = query.sort(sortBy);
+                        // sort('price, rating')
+                    }
+                    else {
+                        query = query.sort('-createdAt');
+                    }
+                    if (req.query.fields) {
+                        fields = req.query.fields.split(',').join(' ');
+                        query = query.select(fields);
+                    }
+                    else {
+                        query = query.select('-__v');
+                    }
+                    page = req.query.page * 1 || 1;
+                    limit = req.query.limit || 100;
+                    skip = (page - 1) * limit;
+                    query = query.skip(skip).limit(limit);
+                    if (!req.query.page)
+                        return [3 /*break*/, 2];
+                    return [4 /*yield*/, listing_1.default.countDocuments()];
+                case 1:
+                    numListings = _a.sent();
+                    if (skip >= numListings) {
+                        throw new Error('error');
+                    }
+                    _a.label = 2;
+                case 2:
+                    features = new module_1.default;
+                    return [4 /*yield*/, query];
+                case 3:
+                    listings = _a.sent();
+                    res.status(200).json({
+                        status: 'success',
+                        result: listings.length,
+                        data: { listings: listings },
+                    });
+                    return [2 /*return*/];
+            }
+        });
+    });
+});
+exports.getListings = getListings;
 var updateListing = (0, catchAsync_1.default)(function (req, res, next) {
     return __awaiter(void 0, void 0, void 0, function () {
         var id, listing;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    id = req.body.id.id;
-                    return [4 /*yield*/, listing_1.default.findByIdAndUpdate(id, req.body)];
+                    id = req.params.id;
+                    return [4 /*yield*/, listing_1.default.findByIdAndUpdate(id, req.body, { new: true, runValidators: true })];
                 case 1:
                     listing = _a.sent();
-                    if (!listing)
-                        return [2 /*return*/, next(new _1.default('Invalid id', 404))];
+                    if (!listing) {
+                        return [2 /*return*/, next(new appError_1.default('Invalid id', 404))];
+                    }
                     res.status(200).json({
                         status: 'success',
                         data: { listing: listing },
@@ -135,3 +187,26 @@ var updateListing = (0, catchAsync_1.default)(function (req, res, next) {
     });
 });
 exports.updateListing = updateListing;
+var deleteListing = (0, catchAsync_1.default)(function (req, res, next) {
+    return __awaiter(void 0, void 0, void 0, function () {
+        var id, tour;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    id = req.params.id;
+                    return [4 /*yield*/, listing_1.default.findByIdAndDelete(id)];
+                case 1:
+                    tour = _a.sent();
+                    if (!tour) {
+                        return [2 /*return*/, next(new appError_1.default('invalid ID', 404))];
+                    }
+                    res.status(204).json({
+                        status: 'success',
+                        message: 'Tour was deleted successfully',
+                    });
+                    return [2 /*return*/];
+            }
+        });
+    });
+});
+exports.deleteListing = deleteListing;

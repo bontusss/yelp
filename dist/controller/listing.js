@@ -39,10 +39,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getListings = exports.updateListing = exports.createListing = void 0;
+exports.deleteListing = exports.getListings = exports.updateListing = exports.createListing = void 0;
 var appError_1 = __importDefault(require("../utils/appError"));
 var listing_1 = __importDefault(require("../model/listing"));
 var catchAsync_1 = __importDefault(require("../utils/catchAsync"));
+var apiFeatures_1 = __importDefault(require("../utils/apiFeatures"));
 var createListing = (0, catchAsync_1.default)(function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var newListing;
     return __generator(this, function (_a) {
@@ -60,10 +61,16 @@ var createListing = (0, catchAsync_1.default)(function (req, res) { return __awa
 }); });
 exports.createListing = createListing;
 var getListings = (0, catchAsync_1.default)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var listings;
+    var features, listings;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, listing_1.default.find()];
+            case 0:
+                features = new apiFeatures_1.default(listing_1.default.find(), req.query)
+                    .filter()
+                    .sort()
+                    .limitFields()
+                    .paginate();
+                return [4 /*yield*/, features.query];
             case 1:
                 listings = _a.sent();
                 res.status(200).json({
@@ -82,13 +89,12 @@ var updateListing = (0, catchAsync_1.default)(function (req, res, next) { return
         switch (_a.label) {
             case 0:
                 id = req.params.id;
-                return [4 /*yield*/, listing_1.default.findOneAndUpdate({ _id: id }, req.body)];
+                return [4 /*yield*/, listing_1.default.findByIdAndUpdate(id, req.body, { new: true, runValidators: true })];
             case 1:
                 listing = _a.sent();
                 if (!listing) {
                     return [2 /*return*/, next(new appError_1.default('Invalid id', 404))];
                 }
-                ;
                 res.status(200).json({
                     status: 'success',
                     data: { listing: listing },
@@ -98,3 +104,24 @@ var updateListing = (0, catchAsync_1.default)(function (req, res, next) { return
     });
 }); });
 exports.updateListing = updateListing;
+var deleteListing = (0, catchAsync_1.default)(function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, tour;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                id = req.params.id;
+                return [4 /*yield*/, listing_1.default.findByIdAndDelete(id)];
+            case 1:
+                tour = _a.sent();
+                if (!tour) {
+                    return [2 /*return*/, next(new appError_1.default('invalid ID', 404))];
+                }
+                res.status(204).json({
+                    status: 'success',
+                    message: 'Tour was deleted successfully',
+                });
+                return [2 /*return*/];
+        }
+    });
+}); });
+exports.deleteListing = deleteListing;

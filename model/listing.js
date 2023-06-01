@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const listingSchema = new mongoose.Schema({
   title: {
@@ -51,6 +51,7 @@ const listingSchema = new mongoose.Schema({
   instagram: String,
   twitter: String,
   linkedIn: String,
+  createdAt: { type: Date, default: Date.now(), select: false },
 });
 
 const Listing = mongoose.model('Listing', listingSchema);

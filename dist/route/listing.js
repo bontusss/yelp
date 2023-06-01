@@ -7,5 +7,5 @@ var express_1 = __importDefault(require("express"));
 var listing_1 = require("../controller/listing");
 var listingRouter = express_1.default.Router();
 listingRouter.route('/').post(listing_1.createListing).get(listing_1.getListings);
-listingRouter.route('/:id').patch(listing_1.updateListing);
+listingRouter.route('/:id').patch(listing_1.updateListing).delete(listing_1.deleteListing);
 exports.default = listingRouter;
