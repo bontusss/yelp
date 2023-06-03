@@ -29,10 +29,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var mongoose_1 = __importDefault(require("mongoose"));
 var dotenv = __importStar(require("dotenv"));
 dotenv.config({ path: './config.env' });
-var DB = process.env.MONGO_URl;
+var DB = process.env.MONGO_l;
 var connectDB = function () {
     console.log('connecting to DB..');
-    mongoose_1.default.connect('mongodb+srv://bontus:bontusfavor1994@cluster0.izncrp4.mongodb.net/gudbye?retryWrites=true&w=majority');
+    // @ts-ignore
+    mongoose_1.default.connect(DB);
     mongoose_1.default.connection.on('connected', function () {
         console.log('Database is connected');
     });
@@ -42,11 +43,5 @@ var connectDB = function () {
     mongoose_1.default.connection.on('disconnected', function () {
         console.warn("Warn: Database is disconnected");
     });
-    //   process.on('SIGINT', function () {
-    //     mongoose.connection.close( function (){
-    //       console.log('Database is disconnect because of app termination')
-    //       return true
-    //     });
-    //   });
 };
 exports.default = connectDB;

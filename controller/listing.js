@@ -1,53 +1,19 @@
-import AppError from '../utils/appError';
 import Listing from '../model/listing';
-import catchAsync from '../utils/catchAsync';
-import APIFEATURES from '../utils/apiFeatures';
+import factory from './handleFactory';
 
-const createListing = catchAsync(async (req, res) => {
-  const newListing = await Listing.create(req.body);
-  res.status(201).json({
-    status: 'success',
-    data: { newListing },
-  });
-});
+// Get all tours from DB
+const getTours = factory.getAll(Listing);
 
-const getListings = catchAsync(async (req, res, next) => {
-  const features = new APIFEATURES(Listing.find(), req.query)
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate();
-  const listings = await features.query;
+// Create a tour
+const createTour = factory.createOne(Listing);
 
-  res.status(200).json({
-    status: 'success',
-    result: listings.length,
-    data: { listings },
-  });
-});
+// Update a tour by id
+const updateTour = factory.updateOne(Listing);
 
-const updateListing = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
-  const listing = await Listing.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
-  if (!listing) {
-    return next(new AppError('Invalid id', 404));
-  }
-  res.status(200).json({
-    status: 'success',
-    data: { listing },
-  });
-});
+// Get a tour by ID
+const getTour = factory.getOne(Listing, { path: 'reviews' });
 
-const deleteListing = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
-  const tour = await Listing.findByIdAndDelete(id);
-  if (!tour) {
-    return next(new AppError('invalid ID', 404));
-  }
-  res.status(204).json({
-    status: 'success',
-    message: 'Tour was deleted successfully',
-  });
-});
+// Delete a tour
+const deleteTour = factory.deleteOne(Listing);
 
-export { createListing, updateListing, getListings, deleteListing };
+export default { deleteTour, getTour, updateTour, createTour, getTours };
